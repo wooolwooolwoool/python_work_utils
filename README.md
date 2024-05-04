@@ -24,3 +24,9 @@ $ docker_restart.sh
 ```
 
 Or execute docker_restart.bat at any location.
+
+# How to use
+
+Access the following URL from your browser and use the desired application.
+
+- http://localhost:5006
