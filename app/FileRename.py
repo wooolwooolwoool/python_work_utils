@@ -11,7 +11,7 @@ input_dir = pn.widgets.TextInput(name="リネーム対象ファイル格納先",
 output_dir = pn.widgets.TextInput(name="リネーム後ファイル格納先", placeholder=r"C:\Users\user\Files")
 prefix_input = pn.widgets.TextInput(name="接頭語", placeholder="prefix_", width=80)
 suffix_input = pn.widgets.TextInput(name="接尾語", placeholder="_suffix", width=80)
-number_input = pn.widgets.IntInput(name="桁数", value=10, step=1, start=1, end=1000, width=80)
+number_input = pn.widgets.IntInput(name="桁数", value=1, step=1, start=1, end=1000, width=80)
 
 # ボタンウィジェット定義
 load_button = pn.widgets.Button(name="ファイル読み込み", button_type="primary")
