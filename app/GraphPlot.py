@@ -23,8 +23,10 @@ filename_input = pn.widgets.TextAreaInput(name="CSVファイルパス入力", pl
 load_file_but = pn.widgets.Button(name="ファイル読み込み", button_type= "primary", width=150)
 
 # X軸、Y軸を選択するセレクトウィジェットの定義
-graph_mark_sel = pn.widgets.Select(name="マーカー種類", width=300, options=["", ".", "^"], value="")
-graph_line_sel = pn.widgets.Select(name="ライン種類", width=300, options=["", "-", "--"], value="")
+graph_mark_sel = pn.widgets.Select(name="マーカー種類", width=150, options=["", ".", "^"], value="")
+graph_line_sel = pn.widgets.Select(name="ライン種類", width=150, options=["", "-", "--"], value="")
+graph_mark_size = pn.widgets.IntInput(name="マーカーサイズ", value=1, step=1, start=1, width=150)
+graph_line_width = pn.widgets.IntInput(name="ライン幅", value=1, step=1, start=1, width=150)
 x_axis_not_use = pn.widgets.Checkbox(name="X軸を使用しない")
 x_axis_sel = pn.widgets.Select(name="X軸", width=300)
 y_axis_sel = pn.widgets.Select(name="Y軸_1", width=300)
@@ -74,28 +76,24 @@ def load_file(event):
 def add_data(event):
     """ データ追加 """
     num = len(wb2_input)
-    input_widget = pn.widgets.Select(name=f"Y軸_{num}", width=200)
+    input_widget = pn.widgets.Select(name=f"Y軸_{num}", width=300)
     input_widget.options = col_name
     wb2_input.append(input_widget)
 
 def del_data(event):
     """ データ削除 """
     if len(wb2_input) > 2:
-        wb2_input.pop()
+        wb2_input.pop(-1)
 
 # グラフ描画のイベント関数規定
 def display_graph(event):
     display_graph_but.disabled = True 
     display_graph_but.name = "描画中..."
-    global df
-    global ax1
-    
     # figure（描画領域）の定義
     fig1 = plt.figure(figsize=(graph_fig_w.value, graph_fig_h.value))
     # axes（グラフ）の定義
     ax1 = fig1.add_subplot(1,1,1)
 
-    scatter_list = []
     x_col = ""
     # 描画するグラフデータの生成    
     for input_widget in wb2_input:
@@ -104,10 +102,12 @@ def display_graph(event):
         else:
             if x_axis_not_use.value:
                 ax1.plot(range(len(df[input_widget.value])), df[input_widget.value], graph_mark_sel.value + graph_line_sel.value,
-                        label=input_widget.value)            
+                         markersize=graph_mark_size.value, linewidth=graph_line_width.value,
+                         label=input_widget.value)            
             else:
                 ax1.plot(df[x_col], df[input_widget.value], graph_mark_sel.value + graph_line_sel.value,
-                        label=input_widget.value)
+                         markersize=graph_mark_size.value, linewidth=graph_line_width.value,
+                         label=input_widget.value)
     if x_label_sel.value != "":
         ax1.set_xlabel(x_label_sel.value)
     if y_label_sel.value != "":
@@ -123,7 +123,6 @@ def display_graph(event):
     display_graph_but.disabled = False 
     display_graph_but.name = "グラフ描画"
     graph_pane.visible = True
-
     graph_update_but.disabled = False 
 
 # グラフ描画のイベント関数規定
@@ -146,16 +145,19 @@ graph_pane.width = graph_w.value
 graph_pane.height = graph_h.value
 
 # ウィジェットボックスwb1へファイル読み込み関するウィジェットを格納
-wb1 = pn.WidgetBox("### ファイル読み込み", filename_input, load_file_but)
+wb1 = pn.WidgetBox("# ファイル読み込み", filename_input, load_file_but)
 # ウィジェットボックスwb2へグラフ読み込みに関するウィジェットを格納
-wb2 = pn.WidgetBox("### グラフ出力", graph_mark_sel, graph_line_sel, x_axis_not_use, 
+wb2 = pn.WidgetBox("# グラフ出力", 
+                   "### プロットするデータ", x_axis_not_use, 
                    wb2_input, pn.Row(add_button, del_button), 
+                   "### プロット設定", pn.Row(graph_mark_sel, graph_line_sel), 
+                   pn.Row(graph_mark_size, graph_line_width), 
                    x_label_sel, y_label_sel, pn.Row(graph_fig_w, graph_fig_h),
                    pn.Row(graph_x_l, graph_x_u),
                    pn.Row(graph_y_l, graph_y_u),
                    display_graph_but, visible= True)
 wb2_input.extend([x_axis_sel, y_axis_sel])
-wb3 = pn.WidgetBox("### グラフ表示更新", graph_w, graph_h, graph_update_but, visible= True)
+wb3 = pn.WidgetBox("# グラフ表示更新", graph_w, graph_h, graph_update_but, visible= True)
 
 # 出力
 dashboard_layout = pn.Row(pn.Column(wb1, wb2, wb3), graph_pane)
