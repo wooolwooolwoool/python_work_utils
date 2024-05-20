@@ -1,6 +1,8 @@
+import japanize_matplotlib
 import matplotlib
 matplotlib.use('agg')
 from common.path import *
+from common.graphplot import *
 import panel as pn
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -20,24 +22,26 @@ ax1 = fig1.add_subplot(1,1,1)
 filename_input = pn.widgets.TextAreaInput(name="CSVファイルパス入力", placeholder="ここにCSVファイルのパスを入力")
 
 # ファイル読み込みボタンの定義
-load_file_but = pn.widgets.Button(name="ファイル読み込み", button_type= "primary", width=150)
+load_file_but = pn.widgets.Button(name="ファイル読み込み", button_type= "primary", width=140)
 load_file_maxmin = pn.pane.Str()
 
 # MarkerStyleのmarkersを取得
 markers_list = [""]
 markers_dict = matplotlib.markers.MarkerStyle.markers
-markers_list.extend(list(markers_dict.keys()))
+markers = [key for key in markers_dict.keys() if isinstance(key, str) and not key.isdigit() and key not in ['None', ' ', '']]
+markers_list.extend(list(markers))
 
 # Line2DのlineStyles辞書を取得
 linestyles_list = [""]
 linestyles_dict = matplotlib.lines.Line2D.lineStyles
-linestyles_list.extend(list(linestyles_dict.keys()))
+linestyles = [key for key in linestyles_dict.keys() if isinstance(key, str) and key not in ['None', ' ', '']]
+linestyles_list.extend(list(linestyles))
 
 # X軸、Y軸を選択するセレクトウィジェットの定義
-graph_mark_sel = pn.widgets.Select(name="マーカー種類", width=150, options=markers_list, value="")
-graph_line_sel = pn.widgets.Select(name="ライン種類", width=150, options=linestyles_list, value="")
-graph_mark_size = pn.widgets.IntInput(name="マーカーサイズ", value=1, step=1, start=1, width=150)
-graph_line_width = pn.widgets.IntInput(name="ライン幅", value=1, step=1, start=1, width=150)
+graph_mark_sel = pn.widgets.Select(name="マーカー種類", width=140, options=markers_list, value="")
+graph_line_sel = pn.widgets.Select(name="ライン種類", width=140, options=linestyles_list, value="")
+graph_mark_size = pn.widgets.IntInput(name="マーカーサイズ", value=1, step=1, start=1, width=140)
+graph_line_width = pn.widgets.IntInput(name="ライン幅", value=1, step=1, start=1, width=140)
 x_axis_not_use = pn.widgets.Checkbox(name="X軸を指定しない")
 x_axis_sel = pn.widgets.Select(name="X軸", width=300)
 x_axis_datetime = pn.widgets.Checkbox(name="X軸がDatetime")
@@ -47,25 +51,26 @@ add_button = pn.widgets.Button(name="追加", button_type="default")
 del_button = pn.widgets.Button(name="削除", button_type="default")
 x_label_sel = pn.widgets.TextInput(name="X軸ラベル", width=300)
 y_label_sel = pn.widgets.TextInput(name="Y軸ラベル", width=300)
-graph_fig_w = pn.widgets.IntInput(name="グラフ幅", value=8, step=1, start=1, end=5000, width=150)
-graph_fig_h = pn.widgets.IntInput(name= "グラフ高さ", value=6, step=1, start=1, end=5000, width=150)
-num_divx = pn.widgets.IntInput(name= "X軸分割数", value=6, step=1, start=1, end=5000, width=150)
-num_divy = pn.widgets.IntInput(name= "Y軸分割数", value=6, step=1, start=1, end=5000, width=150)
+graph_fig_w = pn.widgets.IntInput(name="グラフ幅", value=8, step=1, start=1, end=5000, width=140)
+graph_fig_h = pn.widgets.IntInput(name= "グラフ高さ", value=6, step=1, start=1, end=5000, width=140)
+num_divx = pn.widgets.IntInput(name= "X軸分割数", value=6, step=1, start=1, end=5000, width=140)
+num_divy = pn.widgets.IntInput(name= "Y軸分割数", value=6, step=1, start=1, end=5000, width=140)
 graph_range_autoset_button = pn.widgets.Button(name="下限上限を自動セット", button_type="default")
-graph_x_u = pn.widgets.FloatInput(name="X軸上限", value=None, step=0.001, width=150)
-graph_x_l = pn.widgets.FloatInput(name="X軸下限", value=None, step=0.001, width=150)
-graph_x_u_datetime = pn.widgets.DatetimePicker(name="X軸上限 Datetime", disabled= True, width=150)
-graph_x_l_datetime = pn.widgets.DatetimePicker(name="X軸下限 Datetime", disabled= True, width=150)
-graph_y_u = pn.widgets.FloatInput(name="Y軸上限", value=None, step=0.001, width=150)
-graph_y_l = pn.widgets.FloatInput(name="Y軸下限", value=None, step=0.001, width=150)
+graph_x_u = pn.widgets.FloatInput(name="X軸上限", value=None, step=0.001, width=140)
+graph_x_l = pn.widgets.FloatInput(name="X軸下限", value=None, step=0.001, width=140)
+graph_x_u_datetime = pn.widgets.DatetimePicker(name="X軸上限 Datetime", disabled= True, width=140)
+graph_x_l_datetime = pn.widgets.DatetimePicker(name="X軸下限 Datetime", disabled= True, width=140)
+graph_y_u = pn.widgets.FloatInput(name="Y軸上限", value=None, step=0.001, width=140)
+graph_y_l = pn.widgets.FloatInput(name="Y軸下限", value=None, step=0.001, width=140)
+graph_range_round_button = pn.widgets.Button(name="Y軸範囲を丸める", button_type="default")
 
 # グラフ表示領域の幅、高さ
-graph_w = pn.widgets.IntInput(name="幅", value=1000, step=1, start=1, end=5000)
-graph_h = pn.widgets.IntInput(name= "高さ", value=600, step=1, start=1, end=5000)
+graph_w = pn.widgets.IntInput(name="幅", value=1200, step=1, start=1, end=5000)
+graph_h = pn.widgets.IntInput(name= "高さ", value=900, step=1, start=1, end=5000)
 
 # グラフを描画するボタンの定義
-display_graph_but = pn.widgets.Button(name= "グラフ描画", button_type= "primary", width=150, disabled= True)
-graph_update_but = pn.widgets.Button(name= "グラフ更新", button_type= "primary", width=150, disabled= True)
+display_graph_but = pn.widgets.Button(name= "グラフ描画", button_type= "primary", width=140, disabled= True)
+graph_update_but = pn.widgets.Button(name= "グラフ更新", button_type= "primary", width=140, disabled= True)
 
 # グラフ（HoloViews）描画パネルの定義
 # データ未入力だとウィジェットエラー出るので仮のグラフデータ格納
@@ -110,32 +115,6 @@ def del_data(event):
     if len(wb2_input) > 2:
         wb2_input.pop(-1)
 
-def divide_ticks(start, end, num_divisions):
-    if start > end:
-        start, end = end, start
-    
-    total_duration = end - start
-    division_duration = total_duration / num_divisions
-    
-    divided_ticks = [start + i * division_duration for i in range(num_divisions + 1)]
-    
-    return divided_ticks
-
-def count_digits(n):
-    digits = 1
-    val = 1
-    if n < 1:
-        val *= 0.1
-        while n < val:
-            digits -= 1
-            val *= 0.1
-    elif n > 1:
-        val *= 10
-        while n > val:
-            digits += 1
-            val *= 10
-    return digits
-
 @pn.depends(x_axis_sel.param.value)
 def sele_x(s):
     x_label_sel.value = s
@@ -148,9 +127,11 @@ def sele_y(s):
 
 @pn.depends(x_axis_not_use.param.value)
 def sele_use_x(s):
-    x_axis_sel.disabled = x_axis_not_use.value
-    x_axis_datetime_format.disabled = x_axis_not_use.value
-    x_axis_datetime.disabled = x_axis_not_use.value
+    x_axis_sel.disabled = s
+    x_axis_datetime_format.disabled = s
+    x_axis_datetime.disabled = s
+    if x_axis_datetime.value:
+        x_axis_datetime.value = False
     return 
 
 @pn.depends(x_axis_datetime.param.value)
@@ -172,7 +153,6 @@ def get_y_minmax(widgets):
             y_min = df[input_widget.value].min()
             y_max = df[input_widget.value].max()
     return y_min, y_max
-
 
 def graph_range_autoset(event):
     if x_axis_not_use.value:
@@ -196,7 +176,13 @@ def graph_range_autoset(event):
     graph_y_l.value = y_min
     graph_y_u.value = y_max
     return 
-    
+
+def round_min_max(event):
+    y_min, y_max = round_to_nearest(graph_y_l.value, graph_y_u.value)    
+    graph_y_l.value = y_min
+    graph_y_u.value = y_max
+    return
+
 # グラフ描画のイベント関数規定
 def display_graph(event):
     try:
@@ -268,6 +254,7 @@ graph_update_but.on_click(graph_update)
 add_button.on_click(add_data)
 del_button.on_click(del_data)
 graph_range_autoset_button.on_click(graph_range_autoset)
+graph_range_round_button.on_click(round_min_max)
 
 # ボタンサイズの指定
 load_file_but.width = display_graph_but.width = 150
@@ -291,6 +278,7 @@ wb2 = pn.WidgetBox("# グラフ出力",
                    pn.Row(graph_x_l, graph_x_u),
                    pn.Row(graph_x_l_datetime, graph_x_u_datetime),
                    pn.Row(graph_y_l, graph_y_u),
+                   graph_range_round_button,
                    display_graph_but, visible= True)
 wb2_input.extend([x_axis_sel, y_axis_sel])
 wb3 = pn.WidgetBox("# グラフ表示更新", graph_w, graph_h, graph_update_but, visible= True)
